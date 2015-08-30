@@ -31,7 +31,7 @@ b'*\x00\x00\x00\x02\x00\x00\x00'
 - `pack(self)` - returns bytes that represents C-struct filled by current instance values
 - `__init__(self, data)` - create and initialize object from binary data (its body is only a call of `unpack`, so it's safe to override)
 
-Another important place in module is flag `CStruct.enable\_dynamic\_structures`, which means that you can modify fields definitions for each class derived from CStruct on runtime. By default it set to `False`, because if it is `True` CStruct will rebuild parser before create each new instance of class, but it is lack of performance.
+Another important place in module is flag `CStruct.enable_dynamic_structures`, which means that you can modify fields definitions for each class derived from CStruct on runtime. By default it is set to `False`, because if it is `True` CStruct will rebuild parser before create each new instance of class, but it is lack of performance.
 
 ### In background:
 `cmapping` uses `struct` module from standard Python library and introspection. At first, it looks at all class members and builds appropriate formatting string, that provides `struct` parser with binary data format. Then, parser disassemble binary data. Finally, `cmapping` maps results to object's members and build Python object with fields initialized from raw data. `pack()` function repeats the same work in reverse order, except that formatting string is already buildet and parser is already initialized.
@@ -62,7 +62,7 @@ class Person(CStruct):
 Explicitly define endianness (if endianness is not defined, `Endianness.native` will be used):
 
 ```python
-from cmapping.base import Endianness
+from cmapping import Endianness
 
 class Package(CStruct):
     endianness = Endianness.network
@@ -77,7 +77,7 @@ from cmapping.typedef import Padding
 
 class Package(CStruct):
     body = CString(100)
-    padding = Padding(24)    # 24 bytes of free space
+    padding = Padding(24)    # 24 bytes of unused space
     checksum = Integer()
 ```
 
