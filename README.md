@@ -27,9 +27,9 @@ b'*\x00\x00\x00\x02\x00\x00\x00'
 
 ### How it works:
 `CStruct` defines three important methods: `pack(self)`, `unpack(self, data)` and `__init__(self, data)`.
-`unpack(self, data)` - parses data and updates class members with appropriate values (data is `bytes`)
-`pack(self)` - returns bytes that represents C-struct filled by current instance values
-`__init__(self, data)` - create and initialize object from binary data (its body is only a call of `unpack`, so it's safe to override)
+- `unpack(self, data)` - parses data and updates class members with appropriate values (data is `bytes`)
+- `pack(self)` - returns bytes that represents C-struct filled by current instance values
+- `__init__(self, data)` - create and initialize object from binary data (its body is only a call of `unpack`, so it's safe to override)
 
 Another important place in module is flag `CStruct.enable\_dynamic\_structures`, which means that you can modify fields definitions for each class derived from CStruct on runtime. By default it set to `False`, because if it is `True` CStruct will rebuild parser before create each new instance of class, but it is lack of performance.
 
