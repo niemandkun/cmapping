@@ -31,7 +31,7 @@ b'*\x00\x00\x00\x02\x00\x00\x00'
 - `pack(self)` -- returns bytes that represent C-struct filled by current instance values
 - `__init__(self, data)` -- creates and initializes object from binary data (its body is only a call of `unpack`, so it's safe to override)
 
-Another important thing is flag `CStruct.enable_dynamic_structures` that determines whether you can modify fields definitions for each class derived from CStruct on runtime. By default it is set to `False`, because if it is `True` CStruct will rebuild parser every time it creates new instance of class, but it is lack of performance.
+Another important thing is flag `CStruct.enable_dynamic_structures` that determines whether you can modify fields definitions for each class derived from CStruct on runtime. By default it is set to `False`, because if it is `True` CStruct will rebuild parser every time new instance of class is created, but it is lack of performance.
 
 ### In background:
 `cmapping` uses `struct` module from standard Python library and introspection. At first, it looks at all class members and builds appropriate formatting string that provides `struct` parser with binary data format. Then, parser disassembles binary data. Finally, `cmapping` maps results to object's members and builds Python object with fields initialized from raw data. `pack()` function repeats the same work in reverse order, except that formatting string is already buildet and parser is already initialized.
