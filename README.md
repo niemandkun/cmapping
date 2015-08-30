@@ -37,7 +37,7 @@ Another important place in module is flag `CStruct.enable_dynamic_structures`, w
 `cmapping` uses `struct` module from standard Python library and introspection. At first, it looks at all class members and builds appropriate formatting string, that provides `struct` parser with binary data format. Then, parser disassemble binary data. Finally, `cmapping` maps results to object's members and build Python object with fields initialized from raw data. `pack()` function repeats the same work in reverse order, except that formatting string is already buildet and parser is already initialized.
 
 ### Moar examples of usage:
-Parse array and save result in two lists. If you try to pack oversized array it rises ValueError. If array is undersized free space will be filled by zeroes.
+Parse array and save result in two lists. If you try to pack oversized array it rises ValueError. If array is undersized, free space will be filled by zeroes.
 
 ```python
 class ArrayExample(CStruct):
