@@ -26,7 +26,7 @@ b'*\x00\x00\x00\x02\x00\x00\x00'
 ```
 
 ### How it works:
-`CStruct` defines three important methods: `pack(self)`, `unpack(self, data)` and `__init__(self, data)`.
+`CStruct` defines three important methods: `__init__(self, data)`, `unpack(self, data)` and `pack(self)`.
 - `unpack(self, data)` - parses data and updates class members with appropriate values (data is `bytes`)
 - `pack(self)` - returns bytes that represents C-struct filled by current instance values
 - `__init__(self, data)` - create and initialize object from binary data (its body is only a call of `unpack`, so it's safe to override)
@@ -36,7 +36,7 @@ Another important place in module is flag `CStruct.enable_dynamic_structures`, w
 ### In background:
 `cmapping` uses `struct` module from standard Python library and introspection. At first, it looks at all class members and builds appropriate formatting string, that provides `struct` parser with binary data format. Then, parser disassemble binary data. Finally, `cmapping` maps results to object's members and build Python object with fields initialized from raw data. `pack()` function repeats the same work in reverse order, except that formatting string is already buildet and parser is already initialized.
 
-### Other examples of usage:
+### Moar examples of usage:
 Parse array and save result in two lists. If you try to pack oversized array it rises ValueError. If array is undersized free space will be filled by zeroes.
 
 ```python
