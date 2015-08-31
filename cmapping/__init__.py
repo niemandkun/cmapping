@@ -34,9 +34,9 @@ class CStruct:
 
     @classmethod
     def __init_class(cls):
-        ''' Find all field of type CType declared as <cls> members or members
-        of <cls> parents and create struct.Struct in CStruct.__packer[cls]
-        which is used to pack and unpack <cls> instances.
+        ''' Find all fields of type CType declared as <cls> members or members
+        of <cls> parents and create parser which is used to pack and 
+        unpack <cls> instances.
         '''
         CStruct.__c_members[cls] = []
         for parent in cls.mro()[::-1]:
@@ -49,7 +49,7 @@ class CStruct:
 
     @classmethod
     def __find_c_members(cls, target):
-        ''' Find all field of type CType declared as <target> members '''
+        ''' Find all fields of type CType declared as <target> members '''
         c_members = [x for x in target.__dict__
                      if isinstance(getattr(cls, x), CType)]
         # members order is important due to memory mapping
@@ -95,7 +95,7 @@ class CStruct:
         return CStruct.__packer[cls].pack(*values)
 
     def __padded_with_zeros(self, array, length):
-        ''' Returns <array> padded with zeros at the end to match <length> '''
+        ''' Returns <array> padded with zeroes at the end to match <length> '''
         if len(array) > length:
             raise ValueError("Max array len is {}, but was {}.".format(
                              length, len(array)))
