@@ -1,7 +1,7 @@
 import itertools
 
 
-class Indexable:
+class Indexed:
     ''' Counts instances of this class and gives them unique _index. '''
     _counter = itertools.count()
 
@@ -11,5 +11,5 @@ class Indexable:
         return obj
 
 
-class CType(Indexable):
+class CType(Indexed):
     pass
