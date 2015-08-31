@@ -1,6 +1,6 @@
 # cmapping
 
-*Syntactic sugar for Python 3+*
+*Syntactic sugar for struct*
 
 ### About:
 In the C programming language a [**struct**](https://en.wikipedia.org/wiki/Struct_(C_programming_language)) is a data type declaration that defines a physically grouped list of variables to be placed under one name in a block of memory.
