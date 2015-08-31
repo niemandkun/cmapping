@@ -1,60 +1,27 @@
-import struct
-from enum import Enum
-
+from cmapping.base import CType, ClassInitManager
+from cmapping.utils import padded_with_zeros
 from cmapping.typedef import Padding
-from cmapping.base import CType
+import cmapping.endianness as endian
 
 
-class Endianness(Enum):
-    little_endian = 1
-    big_endian = 2
-    network = 2
-    native = 3
+class Endianness:
+    little_endian = endian.little_endian
+    big_endian = endian.big_endian
+    network = endian.network_endian
+    native = endian.native_endian
 
 
 class CStruct:
     ''' Python object, capable to pack and unpack itself into C structure. '''
 
     enable_dynamic_structures = False
-
-    __endianness = {
-        Endianness.little_endian: '<',
-        Endianness.big_endian: '>',
-        Endianness.native: '@',
-    }
-
-    __packer = {}
-    __c_members = {}
+    manager = ClassInitManager()
 
     def __new__(cls, *args, **kwargs):
-        if not (cls in CStruct.__packer and cls in CStruct.__c_members) \
-                or CStruct.enable_dynamic_structures:
-            cls.__init_class()
+        if CStruct.enable_dynamic_structures or \
+                not CStruct.manager.is_ready(cls):
+            CStruct.manager.init_class(cls)
         return super(CStruct, cls).__new__(cls)
-
-    @classmethod
-    def __init_class(cls):
-        ''' Find all fields of type CType declared as <cls> members or members
-        of <cls> parents and create parser which is used to pack and 
-        unpack <cls> instances.
-        '''
-        CStruct.__c_members[cls] = []
-        for parent in cls.mro()[::-1]:
-            CStruct.__c_members[cls] += cls.__find_c_members(parent)
-
-        fmt = ''.join([str(getattr(cls, x)) for x in CStruct.__c_members[cls]])
-        if hasattr(cls, 'endianness'):
-            fmt = CStruct.__endianness[cls.endianness] + fmt
-        CStruct.__packer[cls] = struct.Struct(fmt)
-
-    @classmethod
-    def __find_c_members(cls, target):
-        ''' Find all fields of type CType declared as <target> members '''
-        c_members = [x for x in target.__dict__
-                     if isinstance(getattr(cls, x), CType)]
-        # members order is important due to memory mapping
-        c_members.sort(key=lambda x: getattr(cls, x)._index)
-        return c_members
 
     def __init__(self, binary_data):
         ''' Create instance from its binary representation. '''
@@ -65,16 +32,18 @@ class CStruct:
         according to their type and length from binary data.
         '''
         cls = type(self)    # Derived class, should be already initialized
-        values = list(CStruct.__packer[cls].unpack(binary_data))[::-1]
-        for attr in CStruct.__c_members[cls]:
-            member = getattr(cls, attr)
-            if isinstance(member, Padding):
+        packer = CStruct.manager.get_packer(cls)
+        values = list(packer.unpack(binary_data))
+
+        for attr in CStruct.manager.get_c_attrs(cls)[::-1]:
+            ctype = getattr(cls, attr)
+            if isinstance(ctype, Padding):
                 continue
-            elif len(member) == 1:
+            elif len(ctype) == 1:
                 setattr(self, attr, values.pop())
             else:
-                setattr(self, attr, values[-len(member):][::-1])
-                values = values[:-len(member)]
+                setattr(self, attr, values[-len(ctype):])
+                values = values[:-len(ctype)]
 
     def pack(self):
         ''' Returns string of bytes containing values of CType fields declared
@@ -83,22 +52,12 @@ class CStruct:
         cls = type(self)
         values = []
 
-        for attr in CStruct.__c_members[cls]:
-            member = getattr(cls, attr)
-            if isinstance(member, Padding):
+        for attr in CStruct.manager.get_c_attrs(cls):
+            ctype = getattr(cls, attr)
+            if isinstance(ctype, Padding):
                 continue
-            elif len(member) == 1:
+            elif len(ctype) == 1:
                 values.append(getattr(self, attr))
             else:
-                values += self.__padded_with_zeros(getattr(self, attr),
-                                                   len(member))
-        return CStruct.__packer[cls].pack(*values)
-
-    def __padded_with_zeros(self, array, length):
-        ''' Returns <array> padded with zeroes at the end to match <length> '''
-        if len(array) > length:
-            raise ValueError("Max array len is {}, but was {}.".format(
-                             length, len(array)))
-        if len(array) < length:
-            array += [0,] * (length - len(array))
-        return array
+                values += padded_with_zeros(getattr(self, attr), len(ctype))
+        return CStruct.manager.get_packer(cls).pack(*values)
