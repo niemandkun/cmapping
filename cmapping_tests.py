@@ -183,7 +183,7 @@ class TestUserClass(unittest.TestCase):
 
     def test_c_members(self):
         obj = UserClass(self.create_test_data())
-        c_members = CStruct._CStruct__c_members[UserClass]
+        c_members = CStruct.manager.get_c_attrs(UserClass)
 
         for i in range(3):
             self.assertEqual(c_members[i], 'c_member_{}'.format(i))
